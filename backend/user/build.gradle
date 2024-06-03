@@ -38,8 +38,12 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 
 	//Spring Security
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
-//	testImplementation 'org.springframework.security:spring-security-test'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	//Thymeleaf
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 
 	//OAuth
 //	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
