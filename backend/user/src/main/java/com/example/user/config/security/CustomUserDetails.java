@@ -1,4 +1,4 @@
-package com.example.user.config;
+package com.example.user.config.security;
 
 import com.example.user.domain.entity.User;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,4 +1,4 @@
-package com.example.user.config;
+package com.example.user.config.security;
 
 import com.example.user.domain.entity.User;
 import com.example.user.repository.UserRepository;

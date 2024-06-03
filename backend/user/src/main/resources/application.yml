@@ -7,3 +7,13 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 580473374375-d7gm5u312u0857ot8qhu2p066jsfc1q9.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - profile
+              - email
