@@ -11,13 +11,11 @@ public class TestController {
     
     @GetMapping("/1")
     ResponseEntity<?> test1() {
-        System.out.println("테스트1");
-        return ResponseEntity.ok("안녕ㅋㅋ");
+        return ResponseEntity.ok("인증되지 않은 유저도 사용 가능합니다.");
     }
 
     @GetMapping("/2")
     ResponseEntity<?> test2() {
-        System.out.println("테스트2");
-        return ResponseEntity.ok("메롱ㅎㅎ");
+        return ResponseEntity.ok("인증된 유저만 사용 가능합니다.");
     }
 }

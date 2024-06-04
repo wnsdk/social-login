@@ -34,10 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-//    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
-//        this.jwtTokenProvider = jwtTokenProvider;
-//    }
-
     // 인증에서 제외할 url
     private static final List<String> EXCLUDE_URL =
             List.of(
@@ -48,8 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        boolean isExcludeUrl = EXCLUDE_URL.stream().anyMatch(exclude -> exclude.equalsIgnoreCase(request.getServletPath()));
-        return isExcludeUrl;
+        return EXCLUDE_URL.stream().anyMatch(exclude -> exclude.equalsIgnoreCase(request.getServletPath()));
     }
 
     @Override

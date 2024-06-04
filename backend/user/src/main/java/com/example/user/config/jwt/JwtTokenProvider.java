@@ -33,7 +33,6 @@ public class JwtTokenProvider {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60 * 1000L;     // 30일
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 90 * 24 * 60 * 60 * 1000L;    // 90일
-    private static final int REFRESH_TOKEN_EXPIRE_TIME_COOKIE = Integer.MAX_VALUE;
 
     private final Key key;
 
@@ -102,9 +101,6 @@ public class JwtTokenProvider {
     // 토큰 정보를 검증하는 메서드
     public boolean validateToken(String token) {
         try {
-//            if (token == null) {
-//                throw new NullPointerException();
-//            }
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
@@ -135,7 +131,4 @@ public class JwtTokenProvider {
         return (expiration.getTime() - now);
     }
 
-//    public static int getRefreshTokenExpireTimeCookie() {
-//        return REFRESH_TOKEN_EXPIRE_TIME_COOKIE;
-//    }
 }

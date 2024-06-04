@@ -1,3 +1,4 @@
+import styles from './MainPage.module.css';
 import { useLoginStore } from '../store/UserStore';
 
 export default function MainPage() {
@@ -11,16 +12,22 @@ export default function MainPage() {
     }
 
     return (
-        <>
+        <div className={styles.body}>
             {email == null ? (
-                <>
-                    <button onClick={() => login('google')}>구글 로그인</button>
-                    <button onClick={() => login('kakao')}>카카오 로그인</button>
-                    <button onClick={() => login('naver')}>네이버 로그인</button>
-                </>
+                <div className={styles.btn_box}>
+                    <button className={styles.btn} onClick={() => login('google')}>
+                        구글 로그인
+                    </button>
+                    <button className={styles.btn} onClick={() => login('kakao')}>
+                        카카오 로그인
+                    </button>
+                    <button className={styles.btn} onClick={() => login('naver')}>
+                        네이버 로그인
+                    </button>
+                </div>
             ) : (
                 email
             )}
-        </>
+        </div>
     );
 }
