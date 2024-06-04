@@ -31,23 +31,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 존재하지 않는 유저라면 회원가입, 존재하는 유저라면 업데이트
         Optional<User> findUser = userRepository.findByEmail(oAuth2UserInfo.email());
-        User user = null;
+        User savedUser = null;
         if (findUser.isEmpty()) {
-            user = User.builder()
+            User user = User.builder()
                     .email(oAuth2UserInfo.email())
                     .name(oAuth2UserInfo.name())
                     .profile(oAuth2UserInfo.profile())
                     .role(Role.USER)
                     .status(Status.ACTIVE)
                     .build();
+            savedUser = userRepository.save(user);
         }
         else {
-            user = User.builder()
-                    .name(oAuth2UserInfo.name())
-                    .profile(oAuth2UserInfo.profile())
-                    .build();
+            savedUser = findUser.get();
+            savedUser.setName(oAuth2UserInfo.name());
+            savedUser.setProfile(oAuth2UserInfo.profile());
         }
-        User savedUser = userRepository.save(user);
 
         return new PrincipalDetails(savedUser, oAuth2UserAttributes);
     }
