@@ -1,5 +1,7 @@
 package com.example.user.config.jwt;
 
+import com.example.user.exception.BaseException;
+import com.example.user.exception.ErrorMessage;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -31,8 +33,14 @@ public class JwtTokenProvider {
     private static final String PROFILE_KEY = "profile";
     private static final String BEARER_TYPE = "Bearer";
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60 * 1000L;     // 30일
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 90 * 24 * 60 * 60 * 1000L;    // 90일
+
+    @Value("${jwt.access-token-expire-time}")
+    private long ACCESS_TOKEN_EXPIRE_TIME;
+    //    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60 * 1000L;     // 30일
+
+    @Value("${jwt.refresh-token-expire-time}")
+    private long REFRESH_TOKEN_EXPIRE_TIME;    // 90일
+//    private static final long REFRESH_TOKEN_EXPIRE_TIME = 90 * 24 * 60 * 60 * 1000L;    // 90일
 
     private final Key key;
 
@@ -41,21 +49,22 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public TokenInfo generateToken(String uuid, String email, String name, String profile, String role) {
+    public TokenInfo generateToken(String userId, String email, String name, String profile, String role) {
         long now = (new Date()).getTime();
         // Access Token 생성
         String accessToken = Jwts.builder()
-                .setSubject(uuid)
+                .setSubject(userId)
                 .claim(EMAIL_KEY, email)
                 .claim(NAME_KEY, name)
                 .claim(PROFILE_KEY, profile)
                 .claim(AUTHORITIES_KEY, role)
-                .signWith(key, SignatureAlgorithm.HS256)
                 .setExpiration(new Date(now + ACCESS_TOKEN_EXPIRE_TIME))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
+                .setSubject(userId)
                 .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -68,20 +77,22 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    // Request Header 에서 토큰 정보 추출
+    // Request Header 에서 토큰 추출
     public String getToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        System.out.println(bearerToken);
 
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TYPE)) {
+            System.out.println(bearerToken.substring(7));
             return bearerToken.substring(7);
         }
         return null;
     }
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
-    public Authentication getAuthentication(String accessToken) {
+    public Authentication getAuthentication(String token) {
         // 토큰 복호화
-        Claims claims = parseClaims(accessToken);
+        Claims claims = parseClaims(token);
 
         if (claims.get(AUTHORITIES_KEY) == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
@@ -105,12 +116,15 @@ public class JwtTokenProvider {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
+            throw new BaseException(ErrorMessage.ACCESS_TOKEN_INVALID_SIGNATURE);
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT Token", e);
+            throw new BaseException(ErrorMessage.ACCESS_TOKEN_EXPIRE);
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
         } catch (IllegalArgumentException e) {
             log.info("JWT is empty.", e);
+            throw new BaseException(ErrorMessage.ACCESS_TOKEN_EMPTY);
         }
         return false;
     }

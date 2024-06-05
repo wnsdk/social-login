@@ -50,6 +50,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         super.clearAuthenticationAttributes(request);
         authorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
 
+        // targetUrl 로 사용자를 리디렉션
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        Optional<String> redirectUri = CookieUtil.getCookie(request, OAuth2AuthorizationRequestBasedOnCookieRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
+                .map(Cookie::getValue);
+        String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
+
         // token 발급
         TokenInfo tokenInfo = issueToken(request, response, authentication);
 
@@ -62,22 +71,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CookieUtil.deleteCookie(request, response, "RT"); //TODO : 이 부분 고쳐야됨
         CookieUtil.addCookie(response, "RT", tokenInfo.getRefreshToken(), REFRESH_TOKEN_EXPIRE_TIME_COOKIE);
 
-        // response 의 헤더에 AT 담아주기
-        response.setHeader("Access-Token", tokenInfo.getAccessToken());
-        System.out.println(tokenInfo.getAccessToken());
-
-        // targetUrl로 사용자를 리다이렉션
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
-    }
-
-    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        Optional<String> redirectUri = CookieUtil.getCookie(request, OAuth2AuthorizationRequestBasedOnCookieRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
-                .map(Cookie::getValue);
-        String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
 
         return UriComponentsBuilder.fromUriString(targetUrl)
-//                .queryParam("accessToken", tokenInfo.getAccessToken()) //쿼리 파라미터가 아니라 헤더에 담아 보내줘야되는데...
-//                .queryParam("refreshToken", tokenInfo.getRefreshToken())
+                .queryParam("accessToken", tokenInfo.getAccessToken())  // 리디렉션 url 쿼리파라미터에 AT 전달
                 .build().toUriString();
     }
 

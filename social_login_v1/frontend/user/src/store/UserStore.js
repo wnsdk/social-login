@@ -6,7 +6,6 @@ const useLoginStore = create((set) => ({
     profile: null,
     role: null,
     accessToken: null,
-    refreshToken: null,
 }));
 
 export { useLoginStore };

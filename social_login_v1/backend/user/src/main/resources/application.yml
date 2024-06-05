@@ -24,4 +24,5 @@ spring:
 
 jwt:
   secret: asdfdfasddsgsaf13241324fdsfdssdgsdgfasdfasdf432351234
-  refresh-token-expire-time: 2592000  # 30 days
+  access-token-expire-time: 10000
+  refresh-token-expire-time: 2592000  # 30 days 7776000000

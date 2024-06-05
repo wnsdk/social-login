@@ -1,0 +1,16 @@
+.floating_btn {
+    background-color: rgb(230, 197, 107);
+    box-shadow: 5px 5px 10px 0px rgba(0, 0, 0, 0.5);
+    /* border-radius: 100%; */
+    width: 160px;
+    height: 100px;
+
+    position: fixed;
+    z-index: 999;
+    right: 30px;
+    bottom: 30px;
+
+    font-size: 20px;
+    font-weight: bold;
+    /* color: white; */
+}
