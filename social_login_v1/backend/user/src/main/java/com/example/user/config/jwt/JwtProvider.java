@@ -1,7 +1,5 @@
 package com.example.user.config.jwt;
 
-import com.example.user.exception.BaseException;
-import com.example.user.exception.ErrorMessage;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -26,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class JwtTokenProvider {
+public class JwtProvider {
 
     private static final String AUTHORITIES_KEY = "auth";
     private static final String NAME_KEY = "name";
@@ -45,7 +42,7 @@ public class JwtTokenProvider {
 
     private final Key key;
 
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+    public JwtProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -128,16 +125,13 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token", e);
-//            throw new BaseException(ErrorMessage.ACCESS_TOKEN_INVALID_SIGNATURE);
+            log.info("Invalid JWT Token");
         } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
-//            throw new BaseException(ErrorMessage.ACCESS_TOKEN_EXPIRE);
+            log.info("Expired JWT Token");
         } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
+            log.info("Unsupported JWT Token");
         } catch (IllegalArgumentException e) {
-            log.info("JWT is empty.", e);
-//            throw new BaseException(ErrorMessage.ACCESS_TOKEN_EMPTY);
+            log.info("JWT is empty.");
         }
         return false;
     }

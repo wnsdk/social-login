@@ -1,30 +1,25 @@
 package com.example.user.config.security;
 
 import com.example.user.config.jwt.JwtAuthenticationFilter;
-import com.example.user.config.jwt.JwtTokenProvider;
+import com.example.user.config.jwt.JwtProvider;
 import com.example.user.config.oauth.OAuth2SuccessHandler;
-import com.example.user.domain.enums.Role;
-import jakarta.servlet.Filter;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +34,8 @@ public class SecurityConfig {
 //    private final JwtTokenProvider jwtTokenProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final JwtProvider jwtProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,11 +46,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // JwtFilter 에서 authenticate 해줌
                 );
 
-//        http
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .permitAll()
-//                );
         http
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -86,7 +78,27 @@ public class SecurityConfig {
         // 인증 실패할 경우
         http.exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint));
 
-        //UsernamePasswordFilter에서 클라이언트가 요청한 리소스의 접근 권한이 없을 때 막는 역할을 하기 때문에 이 필터 전에 jwtAuthenticationFilter실행
+        http.logout(logout ->
+                        logout
+                                .logoutUrl("/logout")
+                                .addLogoutHandler((request, response, authentication) -> {
+                                    HttpSession session = request.getSession();
+                                    if (session != null) {
+                                        session.invalidate();
+                                    }
+                                    // redis 에 있는 RT 삭제
+                                    String accessToken = jwtProvider.getToken(request);
+                                    redisTemplate.delete("RT:" + jwtProvider.getSub(accessToken));
+                                })
+                                .permitAll()
+                                // 로그아웃 성공 후 자동으로 리다이렉트 되는 거 막기
+                                .logoutSuccessHandler((request, response, authentication) -> {})
+//                                .logoutSuccessUrl("/")
+                                // cookie 에 있는 RT 삭제
+                                .deleteCookies("RT")
+                );
+
+        //UsernamePasswordFilter 에서 클라이언트가 요청한 리소스의 접근 권한이 없을 때 막는 역할을 하기 때문에 이 필터 전에 jwtAuthenticationFilter실행
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         http

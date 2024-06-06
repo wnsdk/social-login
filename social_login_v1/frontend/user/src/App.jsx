@@ -6,17 +6,9 @@ import { authAxios } from './apis/authAxios';
 
 function App() {
     function request() {
-        authAxios
-            .get(`/test/2`)
-            .then((res) => {
-                // alert(res.data);
-            })
-            .catch((err) => {
-                if (err.response) {
-                    console.log(err.response.data);
-                }
-                //TODO : store 비우고 로그인 페이지로 이동(로그아웃 처리)
-            });
+        authAxios.get(`/test/2`).then((res) => {
+            alert(res.data);
+        });
     }
 
     return (

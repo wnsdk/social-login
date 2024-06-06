@@ -11,22 +11,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.authentication.AuthenticationFilter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -38,7 +27,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtProvider jwtProvider;
     private final RedisTemplate<String, String> redisTemplate;
     private final UserRepository userRepository;
 
@@ -47,8 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             List.of(
 //                    "/oauth2/authorization/google",
                     "/login/oauth2/code/google"
-                    , "/login"
-
             );
 
     @Override
@@ -67,16 +54,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        SecurityContext context = SecurityContextHolder.getContext();
+
         try {
             // Request Header 에서 Access Token 추출
-            String accessToken = jwtTokenProvider.getToken(request);
+            String accessToken = jwtProvider.getToken(request);
 
             // AccessToken 유효성 검사
-            if (jwtTokenProvider.validateToken(accessToken)) {
+            if (jwtProvider.validateToken(accessToken)) {
                 // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext 에 저장
                 // 이제 이 스레드는 authenticated 되었다.
-                Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-                SecurityContext context = SecurityContextHolder.getContext();
+                Authentication authentication = jwtProvider.getAuthentication(accessToken);
                 context.setAuthentication(authentication);
             }
 
@@ -88,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String refreshTokenFromClient = cookie.getValue();
 
                 // Cookie 의 RefreshToken 에 담긴 유저 정보로 Redis 에서 RefreshToken 탐색
-                String userId = jwtTokenProvider.getSub(refreshTokenFromClient);
+                String userId = jwtProvider.getSub(refreshTokenFromClient);
                 String refreshTokenFromServer = redisTemplate.opsForValue().get("RT:" + userId);
 
                 // RefreshToken 이 유효하다면 -> accessToken 을 재발급
@@ -102,24 +90,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     User user = optionalUser.get();
 
-                    TokenInfo tokenInfo = jwtTokenProvider.generateToken(String.valueOf(user.getUserId()),
+                    TokenInfo tokenInfo = jwtProvider.generateToken(String.valueOf(user.getUserId()),
                             user.getEmail(), user.getName(), user.getProfile(), user.getRole().getValue());
 
                     response.addHeader("Access-Token", tokenInfo.getAccessToken());
+                    Authentication authentication = jwtProvider.getAuthentication(tokenInfo.getAccessToken());
+                    context.setAuthentication(authentication);
                 }
 
                 // AccessToken 과 RefreshToken 둘 다 유효하지 않다면
                 else {
+                    log.info("refresh 토큰이 이상혀!");
+                    System.out.println(context.getAuthentication());
+                    context.setAuthentication(null);    // TODO : 아니 context 왜 처음부터 authentication 값 제대로 들어가있냐? 언제 들어감?? 원래 이 코드 없어도 됐는데..
                     throw new BaseException(ErrorMessage.REFRESH_TOKEN_EXPIRE);
                 }
             }
-
         } catch (Exception e) {
             request.setAttribute("exception", e);
-        } finally {
-            filterChain.doFilter(request, response);
         }
-
-
+        filterChain.doFilter(request, response);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.user.config.oauth;
 
-import com.example.user.config.jwt.JwtTokenProvider;
+import com.example.user.config.jwt.JwtProvider;
 import com.example.user.config.jwt.TokenInfo;
 import com.example.user.domain.entity.User;
 import com.example.user.repository.UserRepository;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -88,7 +88,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         User savedUser = userRepository.findByEmail(userInfo.email()).get();
 
         // JWT 발급
-        TokenInfo tokenInfo = jwtTokenProvider.generateToken(savedUser.getUserId().toString(), savedUser.getEmail(),
+        TokenInfo tokenInfo = jwtProvider.generateToken(savedUser.getUserId().toString(), savedUser.getEmail(),
                 savedUser.getName(), savedUser.getProfile(), savedUser.getRole().getValue());
 
         return tokenInfo;

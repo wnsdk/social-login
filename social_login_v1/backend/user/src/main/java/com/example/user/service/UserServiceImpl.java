@@ -1,14 +1,15 @@
 package com.example.user.service;
 
+import com.example.user.config.jwt.JwtProvider;
 import com.example.user.domain.entity.User;
 import com.example.user.domain.enums.Role;
 import com.example.user.domain.enums.Status;
 import com.example.user.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

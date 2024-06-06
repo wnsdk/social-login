@@ -6,14 +6,15 @@ export const authAxios = axios.create({
     withCredentials: true,
 });
 
+// 요청을 보내기 전, 인증 정보를 담아서 서버에 전송
 authAxios.interceptors.request.use((config) => {
     const { accessToken } = useLoginStore.getState();
-    // console.log('요청 : ', accessToken);
     config.headers['Authorization'] = 'Bearer ' + accessToken;
     return config;
 });
 
 authAxios.interceptors.response.use(
+    // 응답 헤더에 AccessToken이 포함되어 있다면, 로그인 정보 갱신하기
     (response) => {
         const { setAccessToken } = useLoginStore.getState();
         const accessToken = response.headers.get('Access-Token');
@@ -21,11 +22,23 @@ authAxios.interceptors.response.use(
         if (accessToken) {
             setAccessToken(accessToken);
         }
-        console.log('응답 : ', accessToken);
+        console.log(response);
         return response;
     },
+
+    // 인증되지 않은 유저라면 로그인 페이지로 보내기
     (error) => {
-        console.log(error);
+        const { accessToken, setLogout } = useLoginStore.getState();
+        if (error.response.status == 401) {
+            alert('로그인이 필요합니다.');
+            window.location.href = '/';
+            // 로그인 한 유저였다면 로그아웃 시키기
+            if (accessToken != null) {
+                authAxios.post(`/logout`).then(() => {
+                    setLogout();
+                });
+            }
+        }
         return Promise.reject(error);
     }
 );

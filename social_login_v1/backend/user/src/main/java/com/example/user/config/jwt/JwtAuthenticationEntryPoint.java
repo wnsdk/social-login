@@ -1,5 +1,6 @@
 package com.example.user.config.jwt;
 
+import com.example.user.exception.BaseException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +25,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         // JwtAuthenticationFilter 에서 request 에 담아서 보내준 예외를 처리
-        if (request.getAttribute("exception") != null)
-            resolver.resolveException(request, response, null, (Exception) request.getAttribute("exception"));
+        System.out.println("너 실행됐니?");
+        resolver.resolveException(request, response, null, (BaseException) request.getAttribute("exception"));
     }
 }

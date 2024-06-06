@@ -3,9 +3,11 @@ import { Buffer } from 'buffer';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLoginStore } from '../store/LoginStore';
+import { authAxios } from '../apis/authAxios';
 
 export default function LoginResultPage() {
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     // const email = useLoginStore(state => state.email);
     // const name = useLoginStore(state => state.name);
@@ -14,10 +16,13 @@ export default function LoginResultPage() {
     // const accessToken = useLoginStore(state => state.accessToken);
     // const setAccessToken = useLoginStore(state => state.setAccessToken);
 
-    const { email, name, profile, role, accessToken, setAccessToken } = useLoginStore();
+    const { email, name, profile, role, accessToken, setAccessToken, setLogout } = useLoginStore();
 
     const logout = () => {
-        setAccessToken('111');
+        authAxios.post(`/logout`).then(() => {
+            setLogout(); // store에 저장된 로그인 정보 없애기
+            navigate('/');
+        });
     };
 
     useEffect(() => {
@@ -32,7 +37,6 @@ export default function LoginResultPage() {
             role: result.auth,
             accessToken: searchParams.get('accessToken'),
         });
-        
     }, []);
 
     return (
