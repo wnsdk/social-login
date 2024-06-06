@@ -21,7 +21,7 @@ public record PrincipalDetails(
      */
     @Override
     public String getName() {
-        return user.getEmail();
+        return String.valueOf(user.getUserId());
     }
 
     /**

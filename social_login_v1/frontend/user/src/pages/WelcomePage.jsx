@@ -1,5 +1,5 @@
 import styles from './WelcomePage.module.css';
-import { useLoginStore } from '../store/UserStore';
+import { useLoginStore } from '../store/LoginStore';
 
 export default function LoginPage() {
     // 로그인 정보

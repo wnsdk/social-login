@@ -17,11 +17,11 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:5173") // 클라이언트 출처 명시
-//                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowCredentials(true)
                 .allowedHeaders("*")
-                .maxAge(3600);
+//                .allowedHeaders("Content-Type", "Access-Token", "Authorization")
+                .maxAge(3600);  // preflight 캐싱 시간 (1시간)
     }
 
 }

@@ -38,7 +38,7 @@ public class SecurityConfig {
     private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> oAuth2AuthorizationRequestBasedOnCookieRepository;
 //    private final JwtTokenProvider jwtTokenProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-//    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -56,7 +56,7 @@ public class SecurityConfig {
 //                );
         http
                 .formLogin(AbstractHttpConfigurer::disable)
-//                .httpBasic(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable);
 
         http
@@ -84,10 +84,9 @@ public class SecurityConfig {
                 );
 
         // 인증 실패할 경우
-//        http.exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint));
+        http.exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint));
 
         //UsernamePasswordFilter에서 클라이언트가 요청한 리소스의 접근 권한이 없을 때 막는 역할을 하기 때문에 이 필터 전에 jwtAuthenticationFilter실행
-//        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         http
@@ -95,36 +94,17 @@ public class SecurityConfig {
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
-//                        config.setAllowedOrigins(Collections.singletonList("*"));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-//                        config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowCredentials(true);
-                    config.setAllowedHeaders(Collections.singletonList("*"));
+//                    config.setAllowedHeaders(Collections.singletonList("*"));
+                    config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+                    config.addExposedHeader("Access-Token");
                     config.setMaxAge(3600L);
 
-//                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//                    source.registerCorsConfiguration("/**", config);
-//                    return source;
+
                     return config;
                 }));
 
-//        http.cors(AbstractHttpConfigurer::disable);
-
         return http.build();
     }
-
-    // CORS 허용 적용
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//
-//        configuration.addAllowedOriginPattern("*");
-//        configuration.addAllowedHeader("*");
-//        configuration.addAllowedMethod("*");
-//        configuration.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
 }

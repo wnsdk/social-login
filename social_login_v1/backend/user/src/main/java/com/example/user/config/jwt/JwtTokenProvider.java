@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -51,6 +52,8 @@ public class JwtTokenProvider {
 
     public TokenInfo generateToken(String userId, String email, String name, String profile, String role) {
         long now = (new Date()).getTime();
+        Date expiration = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+
         // Access Token 생성
         String accessToken = Jwts.builder()
                 .setSubject(userId)
@@ -58,7 +61,7 @@ public class JwtTokenProvider {
                 .claim(NAME_KEY, name)
                 .claim(PROFILE_KEY, profile)
                 .claim(AUTHORITIES_KEY, role)
-                .setExpiration(new Date(now + ACCESS_TOKEN_EXPIRE_TIME))
+                .setExpiration(expiration)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
@@ -80,16 +83,26 @@ public class JwtTokenProvider {
     // Request Header 에서 토큰 추출
     public String getToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        System.out.println(bearerToken);
 
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TYPE)) {
-            System.out.println(bearerToken.substring(7));
             return bearerToken.substring(7);
         }
         return null;
     }
 
-    // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
+    // JWT 토큰을 복호화하여 토큰의 sub 값을 return
+    public String getSub(String token) {
+        // 토큰 복호화
+        Claims claims = parseClaims(token);
+
+        if (claims.get("sub") == null) {
+            throw new RuntimeException("토큰의 sub(userId)가 없습니다.");
+        }
+
+        return claims.getSubject();
+    }
+
+    // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드?
     public Authentication getAuthentication(String token) {
         // 토큰 복호화
         Claims claims = parseClaims(token);
@@ -116,15 +129,15 @@ public class JwtTokenProvider {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
-            throw new BaseException(ErrorMessage.ACCESS_TOKEN_INVALID_SIGNATURE);
+//            throw new BaseException(ErrorMessage.ACCESS_TOKEN_INVALID_SIGNATURE);
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT Token", e);
-            throw new BaseException(ErrorMessage.ACCESS_TOKEN_EXPIRE);
+//            throw new BaseException(ErrorMessage.ACCESS_TOKEN_EXPIRE);
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
         } catch (IllegalArgumentException e) {
             log.info("JWT is empty.", e);
-            throw new BaseException(ErrorMessage.ACCESS_TOKEN_EMPTY);
+//            throw new BaseException(ErrorMessage.ACCESS_TOKEN_EMPTY);
         }
         return false;
     }

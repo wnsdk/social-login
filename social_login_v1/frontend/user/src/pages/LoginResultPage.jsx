@@ -2,17 +2,23 @@ import styles from './LoginResultPage.module.css';
 import { Buffer } from 'buffer';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useLoginStore } from '../store/UserStore';
-import { render } from 'react-dom';
+import { useLoginStore } from '../store/LoginStore';
 
 export default function LoginResultPage() {
     const [searchParams] = useSearchParams();
-    
-    const email = useLoginStore((state) => state.email);
-    const name = useLoginStore((state) => state.name);
-    const profile = useLoginStore((state) => state.profile);
-    const role = useLoginStore((state) => state.role);
-    const accessToken = useLoginStore((state) => state.accessToken);
+
+    // const email = useLoginStore(state => state.email);
+    // const name = useLoginStore(state => state.name);
+    // const profile = useLoginStore(state => state.profile);
+    // const role = useLoginStore(state => state.role);
+    // const accessToken = useLoginStore(state => state.accessToken);
+    // const setAccessToken = useLoginStore(state => state.setAccessToken);
+
+    const { email, name, profile, role, accessToken, setAccessToken } = useLoginStore();
+
+    const logout = () => {
+        setAccessToken('111');
+    };
 
     useEffect(() => {
         const base64Payload = searchParams.get('accessToken').split('.')[1];
@@ -26,7 +32,8 @@ export default function LoginResultPage() {
             role: result.auth,
             accessToken: searchParams.get('accessToken'),
         });
-    });
+        
+    }, []);
 
     return (
         <div className={styles.body}>
@@ -52,7 +59,9 @@ export default function LoginResultPage() {
                 </tbody>
             </table>
 
-            <button className={styles.btn}>로그아웃</button>
+            <button className={styles.btn} onClick={() => logout()}>
+                로그아웃
+            </button>
         </div>
     );
 }

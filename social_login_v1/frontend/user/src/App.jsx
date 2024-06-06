@@ -9,8 +9,7 @@ function App() {
         authAxios
             .get(`/test/2`)
             .then((res) => {
-                console.log(res);
-                alert(res.data);
+                // alert(res.data);
             })
             .catch((err) => {
                 if (err.response) {

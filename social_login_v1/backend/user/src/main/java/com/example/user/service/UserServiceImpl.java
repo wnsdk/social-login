@@ -18,8 +18,8 @@ public class UserServiceImpl implements UserService {
 
     @PostConstruct
     public void init() {
-        registerUser("관리자", "admin@example.com", "image url", "ADMIN");
-        registerUser("김유저", "user@example.com", "image url", "USER");
+//        registerUser("관리자", "admin@example.com", "image url", "ADMIN");
+//        registerUser("김유저", "user@example.com", "image url", "USER");
     }
 
     @Override
