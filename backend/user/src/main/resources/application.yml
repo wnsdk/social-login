@@ -1,0 +1,34 @@
+spring:
+  jpa:
+    hibernate:
+#      ddl-auto: create
+      ddl-auto: update
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/test;NON_KEYWORDS=USER
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 580473374375-d7gm5u312u0857ot8qhu2p066jsfc1q9.apps.googleusercontent.com
+            client-secret: ENC(JOV0Fe3olU17bxxd/d/By28LTqFCSAQIsR/I+jUwwCBKYRiy7UZCwkMQT0oz0suI)
+            scope:
+              - profile
+              - email
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+jwt:
+  # $openssl rand -hex 64
+  secret: ENC(SeSHiBANLVAP2N+yK65oyVlJa5xxxlAyDQYy7mkbyQq1+sNIDXyqPoN/o8/WpNqKzU/9Ez13N0F7GhFNv/+GZszKjaCm4nekDTehoh/woCe6e8/w5E8Ifv4EL/e0xmZoRfAJL3wx7ZEjGEYaPeCVNYzQ/YMHycix01UmHA63S19YUeyPId/GtELnOJl65OfF)
+  access-token-expire-time: 20000     # 1000 == 1 second
+  refresh-token-expire-time: 50000
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor

@@ -1,0 +1,45 @@
+.body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile {
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+    object-fit: cover;
+}
+
+.btn {
+    width: 200px;
+    background-color: rgb(153, 200, 200);
+    margin: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+
+table {
+    border-collapse: collapse;
+    text-align: left;
+}
+
+tr {
+    margin-bottom: 50px;
+    vertical-align: top;
+}
+
+th {
+    width: 80px;
+    padding: 5px;
+}
+
+td {
+    width: 360px;
+    padding: 5px;
+    word-break: break-all;
+}
