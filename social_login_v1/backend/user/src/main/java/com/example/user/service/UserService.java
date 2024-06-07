@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface UserService {
 
-    User registerUser(String name, String email, String profile, String role);
+    User registerUser(String name, String email, String profile, String role) throws Exception;
 }

@@ -71,8 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // AccessToken 이 유효하지 않다면 -> RefreshToken 확인
             else {
                 // Cookie 에서 RefreshToken 추출
-                Optional<Cookie> optionalCookie = CookieUtil.getCookie(request, "RT");
-                Cookie cookie = optionalCookie.orElseThrow(() -> new BaseException(ErrorMessage.REFRESH_TOKEN_NOT_MATCH));
+                Cookie cookie = CookieUtil.getCookie(request, "RT").orElseThrow(() -> new BaseException(ErrorMessage.REFRESH_TOKEN_NOT_MATCH));
                 String refreshTokenFromClient = cookie.getValue();
 
                 // Cookie 의 RefreshToken 에 담긴 유저 정보로 Redis 에서 RefreshToken 탐색
@@ -100,8 +99,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // AccessToken 과 RefreshToken 둘 다 유효하지 않다면
                 else {
-                    log.info("refresh 토큰이 이상혀!");
-                    System.out.println(context.getAuthentication());
+                    log.info("refresh 토큰이 이상해!");
                     context.setAuthentication(null);    // TODO : 아니 context 왜 처음부터 authentication 값 제대로 들어가있냐? 언제 들어감?? 원래 이 코드 없어도 됐는데..
                     throw new BaseException(ErrorMessage.REFRESH_TOKEN_EXPIRE);
                 }

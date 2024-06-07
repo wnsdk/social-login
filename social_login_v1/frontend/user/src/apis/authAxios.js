@@ -38,6 +38,8 @@ authAxios.interceptors.response.use(
                     setLogout();
                 });
             }
+        } else if (error.response.status == 403) {
+            alert('권한이 부족합니다.');
         }
         return Promise.reject(error);
     }

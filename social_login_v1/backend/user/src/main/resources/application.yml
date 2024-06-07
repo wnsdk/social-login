@@ -23,6 +23,7 @@ spring:
       port: 6379
 
 jwt:
-  secret: asdfdfasddsgsaf13241324fdsfdssdgsdgfasdfasdf432351234
-  access-token-expire-time: 500     # 20 seconds?
-  refresh-token-expire-time: 1000  # 30 days 7776000000
+  # "openssl rand -hex 64"
+  secret: f463969042c515804e2071a5954d0686444dadc5b9d5d90715ab35c0e947211d94bb1b08f15a2a4842cf21a05a4e1e2f00c7cb66624612fde9e0f31bc8000c9e
+  access-token-expire-time: 500     # 1000 == 1 second
+  refresh-token-expire-time: 1000000

@@ -1,0 +1,22 @@
+.btns {
+    position: fixed;
+    z-index: 999;
+    right: 30px;
+    bottom: 30px;
+
+    display: flex;
+    justify-content: center;
+}
+
+.btn {
+    margin: 0 10px;
+    background-color: rgb(230, 197, 107);
+    box-shadow: 5px 5px 10px 0px rgba(0, 0, 0, 0.5);
+    /* border-radius: 100%; */
+    width: fit-content;
+    height: 70px;
+
+    font-size: 20px;
+    font-weight: bold;
+    /* color: white; */
+}

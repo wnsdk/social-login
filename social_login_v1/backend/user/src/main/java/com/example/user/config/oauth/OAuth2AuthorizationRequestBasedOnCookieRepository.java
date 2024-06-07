@@ -45,6 +45,6 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
     public void removeAuthorizationRequestCookies(HttpServletRequest request, HttpServletResponse response) {
         CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
         CookieUtil.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
-        CookieUtil.deleteCookie(request, response, "RT");
+//        CookieUtil.deleteCookie(request, response, "RT"); // 이 코드 있으면 RT 쿠키가 이미 있는 상태에서 로그인 버튼 다시 누를 경우 RT가 새로 등록이 안되는 버그 있음
     }
 }
