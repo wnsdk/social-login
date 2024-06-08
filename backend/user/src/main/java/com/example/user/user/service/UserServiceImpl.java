@@ -59,4 +59,12 @@ public class UserServiceImpl implements UserService {
         user.setStatus(Status.DELETED);
         return user;
     }
+
+    //회원 수정
+    @Override
+    public User updateUser(String email, String name, String profile) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new BaseException(ErrorMessage.NOT_EXIST_USER));
+        user.updateUser(name, profile);
+        return user;
+    }
 }

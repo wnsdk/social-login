@@ -7,4 +7,6 @@ public interface UserService {
     User registerUser(String name, String email, String profile, String role, String provider);
 
     User deleteUser(String email);
+
+    User updateUser(String email, String name, String profile);
 }

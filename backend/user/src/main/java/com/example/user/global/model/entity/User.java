@@ -42,4 +42,9 @@ public class User extends BaseTimeEntity {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+    public void updateUser(String name, String profile) {
+        this.name = name;
+        this.profile = profile;
+    }
 }

@@ -7,4 +7,17 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ENC(xxQW/5mJYvEtk7wdQRmSewgHK3cVkAd2gzLRJsCphF3c4SX+LPqBWcXZNrnXkSIGus31ynLFz4K4hXm+17gkmsXv42aMPDrxyh9ao1vVHpU=)
+            client-secret: ENC(+cAQeKkMGXceLt+tQWIKflwejlcnnOInLeUH+TftLzop+sty6tQ4Na3J9vz3cMH7)
+            scope:
+              - profile
+              - email
 
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
