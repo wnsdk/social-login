@@ -1,6 +1,6 @@
 import styles from "./WelcomePage.module.css";
 
-export default function LoginPage() {
+export default function WelcomePage() {
   // 소셜 로그인
   function socialLogin(thirdPartyId) {
     window.location.href = `http://localhost:8080/oauth2/authorization/${thirdPartyId}?redirect_uri=http://localhost:5173/oauth/redirect`;

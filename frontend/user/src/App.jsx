@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import WelcomePage from "./pages/WelcomePage";
 import LoginResultPage from "./pages/LoginResultPage";
 
-function App() {
+export default function App() {
   return (
     <>
       <Routes>
@@ -12,5 +12,3 @@ function App() {
     </>
   );
 }
-
-export default App;
