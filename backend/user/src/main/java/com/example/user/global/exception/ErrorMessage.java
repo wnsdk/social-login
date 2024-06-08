@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 public enum ErrorMessage {
     EXIST_USER(201, "이미 가입된 유저입니다.", HttpStatus.BAD_REQUEST),
     NOT_EXIST_USER(202, "존재하지 않는 유저입니다.", HttpStatus.BAD_REQUEST),
-    DELETED_USER(203, "탈퇴한 유저입니다.", HttpStatus.BAD_REQUEST);
+    DELETED_USER(203, "탈퇴한 유저입니다.", HttpStatus.BAD_REQUEST),
+
+    INVALID_REFRESH_TOKEN(900, "refresh 토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED);
 
     private final Integer code;
     private final String errMsg;

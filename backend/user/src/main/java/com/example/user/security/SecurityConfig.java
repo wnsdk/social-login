@@ -1,5 +1,6 @@
 package com.example.user.security;
 
+import com.example.user.jwt.JwtAuthenticationFilter;
 import com.example.user.oauth.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +10,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -18,14 +25,17 @@ public class SecurityConfig {
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepositoryWithCookie;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/admin").hasAuthority("ADMIN")
-                        .anyRequest().permitAll()
+                        .requestMatchers("/test/all", "/login/**").permitAll()
+                        .requestMatchers("/test/admin").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
                 );
 
         http
@@ -51,6 +61,27 @@ public class SecurityConfig {
                                 // 로그인 성공 시 핸들러
                                 .successHandler(oAuth2SuccessHandler)
                 );
+
+        //UsernamePasswordFilter 에서 클라이언트가 요청한 리소스의 접근 권한이 없을 때 막는 역할을 하기 때문에 이 필터 전에 jwtAuthenticationFilter실행
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // 인증 실패할 경우
+        http.exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint));
+
+        http
+                //localhost:5173 에 대한 CORS 허용
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+
+                    config.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                    config.setAllowCredentials(true);
+                    config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+                    config.addExposedHeader("Access-Token");
+                    config.setMaxAge(3600L);
+
+                    return config;
+                }));
 
         return http.build();
     }

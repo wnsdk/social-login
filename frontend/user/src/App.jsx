@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import WelcomePage from "./pages/WelcomePage";
 import LoginResultPage from "./pages/LoginResultPage";
+import RequestButtons from "./components/RequestButtons";
 
 export default function App() {
   return (
@@ -9,6 +10,7 @@ export default function App() {
         <Route path="/" element={<WelcomePage />} />
         <Route path="/oauth/redirect" element={<LoginResultPage />} />
       </Routes>
+      <RequestButtons />
     </>
   );
 }
