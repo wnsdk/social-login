@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.example.user.global.exception.ErrorMessage.NOT_EXIST_USER;
 import static com.example.user.oauth.OAuth.REFRESH_TOKEN_COOKIE_NAME;
 
 @RestController
@@ -33,7 +34,7 @@ public class TestLoginController {
     @GetMapping("/user")
     ResponseEntity<?> loginUser(HttpServletResponse response) {
         User user = userRepository.findById(2L).orElseThrow(() -> {
-            throw new BaseException(ErrorMessage.NOT_EXIST_USER);
+            throw new BaseException(NOT_EXIST_USER);
         });
         TokenInfo tokenInfo = jwtProvider.generateToken(String.valueOf(user.getId()), user.getEmail(), user.getName(), user.getProfile(), user.getRole().getValue());
         CookieUtil.addCookie(response, String.valueOf(REFRESH_TOKEN_COOKIE_NAME), tokenInfo.getRefreshToken(), REFRESH_TOKEN_EXPIRE_TIME);
@@ -43,7 +44,7 @@ public class TestLoginController {
     @GetMapping("/admin")
     ResponseEntity<?> loginAdmin(HttpServletResponse response) {
         User user = userRepository.findById(1L).orElseThrow(() -> {
-            throw new BaseException(ErrorMessage.NOT_EXIST_USER);
+            throw new BaseException(NOT_EXIST_USER);
         });
         TokenInfo tokenInfo = jwtProvider.generateToken(String.valueOf(user.getId()), user.getEmail(), user.getName(), user.getProfile(), user.getRole().getValue());
         CookieUtil.addCookie(response, String.valueOf(REFRESH_TOKEN_COOKIE_NAME), tokenInfo.getRefreshToken(), REFRESH_TOKEN_EXPIRE_TIME);
