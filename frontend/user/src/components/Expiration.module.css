@@ -1,0 +1,8 @@
+.body {
+    position: fixed;
+    z-index: 888;
+    left: 30px;
+    top: 30px;
+
+    justify-content: center;
+}

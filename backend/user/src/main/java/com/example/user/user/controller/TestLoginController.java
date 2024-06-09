@@ -11,13 +11,17 @@ import com.example.user.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.example.user.global.exception.ErrorMessage.NOT_EXIST_USER;
 import static com.example.user.oauth.OAuth.REFRESH_TOKEN_COOKIE_NAME;
+import static com.example.user.oauth.OAuth.REFRESH_TOKEN_REDIS_NAME;
 
 @RestController
 @RequestMapping("/login")
@@ -25,6 +29,7 @@ import static com.example.user.oauth.OAuth.REFRESH_TOKEN_COOKIE_NAME;
 public class TestLoginController {
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Value("${jwt.refresh-token-expire-time}")
     private int REFRESH_TOKEN_EXPIRE_TIME;
@@ -36,19 +41,28 @@ public class TestLoginController {
         User user = userRepository.findById(2L).orElseThrow(() -> {
             throw new BaseException(NOT_EXIST_USER);
         });
-        TokenInfo tokenInfo = jwtProvider.generateToken(String.valueOf(user.getId()), user.getEmail(), user.getName(), user.getProfile(), user.getRole().getValue());
-        CookieUtil.addCookie(response, String.valueOf(REFRESH_TOKEN_COOKIE_NAME), tokenInfo.getRefreshToken(), REFRESH_TOKEN_EXPIRE_TIME);
+        TokenInfo tokenInfo = jwtProvider.generateToken(user.getId().toString(), user.getEmail(), user.getName(), user.getProfile(), user.getRole().getValue());
 
-        return ResponseEntity.ok(tokenInfo.getAccessToken()); }
+        CookieUtil.addCookie(response, REFRESH_TOKEN_COOKIE_NAME.getValue(), tokenInfo.getRefreshToken(), REFRESH_TOKEN_EXPIRE_TIME);
+        redisTemplate.opsForValue()
+                .set(REFRESH_TOKEN_REDIS_NAME.getValue() + user.getId(), tokenInfo.getRefreshToken(),
+                        REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+
+        return ResponseEntity.ok(tokenInfo.getAccessToken());
+    }
 
     @GetMapping("/admin")
     ResponseEntity<?> loginAdmin(HttpServletResponse response) {
         User user = userRepository.findById(1L).orElseThrow(() -> {
             throw new BaseException(NOT_EXIST_USER);
         });
-        TokenInfo tokenInfo = jwtProvider.generateToken(String.valueOf(user.getId()), user.getEmail(), user.getName(), user.getProfile(), user.getRole().getValue());
-        CookieUtil.addCookie(response, String.valueOf(REFRESH_TOKEN_COOKIE_NAME), tokenInfo.getRefreshToken(), REFRESH_TOKEN_EXPIRE_TIME);
+        TokenInfo tokenInfo = jwtProvider.generateToken(user.getId().toString(), user.getEmail(), user.getName(), user.getProfile(), user.getRole().getValue());
+        CookieUtil.addCookie(response, REFRESH_TOKEN_COOKIE_NAME.getValue(), tokenInfo.getRefreshToken(), REFRESH_TOKEN_EXPIRE_TIME);
+        redisTemplate.opsForValue()
+                .set(REFRESH_TOKEN_REDIS_NAME.getValue() + user.getId(), tokenInfo.getRefreshToken(),
+                        REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
 
-        return ResponseEntity.ok(tokenInfo.getAccessToken()); }
+        return ResponseEntity.ok(tokenInfo.getAccessToken());
+    }
 
 }

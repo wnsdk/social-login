@@ -1,5 +1,7 @@
 package com.example.user.oauth;
 
+import com.example.user.global.exception.BaseException;
+import com.example.user.global.exception.ErrorMessage;
 import com.example.user.global.model.entity.User;
 import com.example.user.global.model.enums.Provider;
 import com.example.user.global.util.CookieUtil;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.user.global.exception.ErrorMessage.NOT_EXIST_USER;
 import static com.example.user.oauth.OAuth.*;
 
 @Component
@@ -76,7 +79,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 유저 정보 추출
         OidcUser oidcUser = ((OidcUser) authentication.getPrincipal());
         OAuth2UserInfo userInfo = OAuth2UserInfo.of(provider, oidcUser.getAttributes());
-        User user = userRepository.findByEmail(userInfo.email()).get();
+        User user = userRepository.findByEmail(userInfo.email()).orElseThrow(() -> new BaseException(NOT_EXIST_USER));
 
         // JWT 발급
         TokenInfo tokenInfo = jwtProvider.generateToken(user.getId().toString(), user.getEmail(), user.getName(),

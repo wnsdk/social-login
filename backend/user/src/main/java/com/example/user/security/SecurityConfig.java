@@ -1,12 +1,17 @@
 package com.example.user.security;
 
 import com.example.user.jwt.JwtAuthenticationFilter;
+import com.example.user.jwt.JwtProvider;
+import com.example.user.oauth.OAuth;
 import com.example.user.oauth.OAuth2SuccessHandler;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
@@ -18,6 +23,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import java.util.Collections;
 import java.util.List;
 
+import static com.example.user.oauth.OAuth.REFRESH_TOKEN_COOKIE_NAME;
+import static com.example.user.oauth.OAuth.REFRESH_TOKEN_REDIS_NAME;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -27,9 +35,17 @@ public class SecurityConfig {
     private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepositoryWithCookie;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final JwtProvider jwtProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        // 이 코드 없으면 로그아웃 할 때 403 에러 뜸
+        http
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
 
         http
                 .authorizeHttpRequests((authorize) -> authorize
@@ -77,11 +93,26 @@ public class SecurityConfig {
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     config.setAllowCredentials(true);
                     config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
-                    config.addExposedHeader("Access-Token");
+                    config.setExposedHeaders(List.of("Access-Token"));
                     config.setMaxAge(3600L);
 
                     return config;
                 }));
+
+        http.logout(logout ->
+                logout
+                        .logoutUrl("/logout")
+                        .addLogoutHandler((request, response, authentication) -> {
+                            // redis 에 있는 RT 삭제
+                            String accessToken = jwtProvider.getToken(request);
+                            redisTemplate.delete(REFRESH_TOKEN_REDIS_NAME.getValue() + jwtProvider.getSub(accessToken));
+                        })
+                        // 로그아웃 성공 후 자동으로 리다이렉트 되는 거 막기
+                        .logoutSuccessHandler((request, response, authentication) -> {})
+                        // cookie 에 있는 RT 삭제
+                        .deleteCookies(REFRESH_TOKEN_COOKIE_NAME.getValue())
+                        .invalidateHttpSession(true)
+        );
 
         return http.build();
     }

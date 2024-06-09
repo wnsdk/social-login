@@ -37,6 +37,7 @@ public class User extends BaseTimeEntity {
     private Status status;  // 사용자 상태 (일시정지, 탈퇴 등)
 
     @Column(name = "provider", nullable = false)
+    @Enumerated(EnumType.STRING)
     private Provider provider;
 
     public void setStatus(Status status) {

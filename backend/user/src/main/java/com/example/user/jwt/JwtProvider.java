@@ -45,12 +45,12 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public TokenInfo generateToken(String userId, String email, String name, String profile, String role) {
+    public TokenInfo generateToken(String id, String email, String name, String profile, String role) {
         long now = (new Date()).getTime();
 
         // Access Token 생성
         String accessToken = Jwts.builder()
-                .setSubject(userId)
+                .setSubject(id)
                 .claim(EMAIL_KEY, email)
                 .claim(NAME_KEY, name)
                 .claim(PROFILE_KEY, profile)
@@ -61,7 +61,7 @@ public class JwtProvider {
 
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
-                .setSubject(userId)
+                .setSubject(id)
                 .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -139,14 +139,6 @@ public class JwtProvider {
             return e.getClaims();
         }
     }
-
-//    public Long getExpiration(String token) {
-//        // accessToken 남은 유효시간
-//        Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration();
-//        // 현재 시간
-//        long now = new Date().getTime();
-//        return (expiration.getTime() - now);
-//    }
 
     public Long getExpiration(String token) {
         Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration();

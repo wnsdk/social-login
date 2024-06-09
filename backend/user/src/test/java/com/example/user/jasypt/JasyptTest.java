@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 public class JasyptTest extends JasyptConfig {
     @Test
     public void jasypt_encrypt_decrypt_test() {
-        String plainText = "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";
+        String plainText = "plain text";
 
         StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
-        jasypt.setPassword("rhqckd");
+        jasypt.setPassword("password");
 
         String encryptedText = jasypt.encrypt(plainText);
         String decryptedText = jasypt.decrypt(encryptedText);
